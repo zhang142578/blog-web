@@ -19,11 +19,7 @@ function post (url, params) {
       params, {
         headers: { 'content-type': 'application/json' }
       }).then(res => {
-      if (res.data.errno === 0) {
-        resolve(res.data)
-      } else {
-        reject(res.data)
-      }
+      resolve(res.data)
     }).catch(err => {
       console.log(err)
     })

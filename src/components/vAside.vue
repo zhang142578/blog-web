@@ -3,13 +3,17 @@
         <div id='avatar'>
             <img src="" alt="">
         </div>
-        <div id='register'>
+        <div v-if='this.$store.state.islogin'>
+          Welcome! {{username}}
+          <el-button @click='signout'>注销</el-button>
+        </div>
+        <div v-if='!this.$store.state.islogin' id='register'>
             <button @click='toggle' class='button' size='small'>登陆</button>
-            <button class='button' size='small'>注册</button>
+            <button @click='b_register' class='button' size='small'>注册</button>
         </div>
         <transition name="el-fade-in-linear">
-            <div v-if='stats' id='login'>
-                <button @click='toggle' id='back'>返回</button>
+            <div v-if='stats===1' id='login'>
+                <button @click='toggle' class='back'>返回</button>
                 <p id='biaoyu'>欢迎</p>
                 <div id='main'>
                     <el-input placeholder="请输入内容" v-model="zhanghu">
@@ -21,6 +25,10 @@
                     <el-button @click='submit' id='submit'>登陆</el-button>
                 </div>
             </div>
+            <div v-if='stats===2' id='zhuce'>
+              <button @click='toggle' class='back'>返回</button>
+
+            </div>
         </transition>
     </div>
 </template>
@@ -30,17 +38,35 @@ export default {
   name: 'aside',
   data () {
     return {
-      stats: false,
+      stats: 0,
       zhanghu: '',
-      password: ''
+      password: '',
+      username: ''
+    }
+  },
+  mounted () {
+    if (localStorage.getItem('isLogin')) {
+      this.username = localStorage.getItem('isLogin')
+      this.$store.commit('login')
     }
   },
   components: {
 
   },
   methods: {
+    signout () {
+      this.$store.commit('signout')
+      localStorage.clear()
+    },
     toggle () {
-      this.stats = !this.stats
+      if (this.stats === 2 || this.stats === 1) {
+        this.stats = 0
+      } else {
+        this.stats = 1
+      }
+    },
+    b_register () {
+      this.stats = 2
     },
     submit () {
       const params = {
@@ -48,7 +74,14 @@ export default {
         password: this.password
       }
       login(params).then(res => {
-        console.log(res)
+        if (res.errno === 0) {
+          this.stats = 0
+          this.username = res.message
+          localStorage.setItem('isLogin', res.message)
+          this.$store.commit('login')
+        } else {
+          alert(res.message)
+        }
       })
     }
   }
@@ -91,7 +124,7 @@ export default {
     background white
     #biaoyu
       font-size 30px
-    #back
+    .back
       cursor pointer
       outline none
       border none
@@ -107,4 +140,19 @@ export default {
       transform translate(-50%,-50%)
       #submit
         margin-top 20%
+  #zhuce
+    width:100%
+    position absolute
+    height 100%
+    background white
+    left 0
+    top 0
+    .back
+      cursor pointer
+      outline none
+      border none
+      border-radius 5px
+      display block
+      margin 20px 0
+      padding 5px 5px
 </style>
